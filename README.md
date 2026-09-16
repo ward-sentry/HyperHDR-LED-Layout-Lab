@@ -16,6 +16,8 @@
   <a href="#русский">Русский</a> · <a href="#english">English</a>
 </p>
 
+<img width="3348" height="1286" alt="image" src="https://github.com/user-attachments/assets/4bfd71fd-ae9f-4853-b53c-b8099b930514" />
+
 ---
 
 ## Русский
