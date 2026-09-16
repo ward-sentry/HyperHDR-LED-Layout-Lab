@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Локальный визуальный конструктор расположения светодиодов для HyperHDR">
+  <meta name="theme-color" content="#071016">
+  <title>HyperHDR LED Layout</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23071016'/%3E%3Cpath d='M14 19h36v26H14z' fill='none' stroke='%2324e4c4' stroke-width='4'/%3E%3Ccircle cx='18' cy='19' r='3' fill='%23ffb454'/%3E%3Ccircle cx='32' cy='19' r='3' fill='%23f25c78'/%3E%3Ccircle cx='46' cy='19' r='3' fill='%238a7dff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="HyperHDR LED Layout — наверх">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span><strong>HyperHDR</strong><small>LED Layout Lab</small></span>
+    </a>
+
+    <div class="summary" aria-live="polite">
+      <span><b id="ledCount">100</b> LED</span>
+      <span><b id="activeCount">100</b> активных</span>
+      <span><b id="powerCount">33.0</b> Вт max</span>
+    </div>
+
+    <div class="top-actions">
+      <div class="language-switch" role="group" aria-label="Язык интерфейса">
+        <button class="active" type="button" data-language="ru" aria-pressed="true">RU</button>
+        <button type="button" data-language="en" aria-pressed="false">EN</button>
+      </div>
+      <button class="button ghost" id="importButton" type="button">Импорт</button>
+      <button class="button ghost" id="copyButton" type="button">Копировать JSON</button>
+      <button class="button primary" id="downloadButton" type="button">Скачать JSON</button>
+      <input id="fileInput" type="file" accept="application/json,.json" hidden>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="panel controls-panel" aria-label="Параметры раскладки">
+      <div class="panel-heading">
+        <div>
+          <span class="eyebrow">Генератор</span>
+          <h1>Расположение</h1>
+        </div>
+        <span class="status-pill" id="modePill">Ленты</span>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Тип раскладки">
+        <button class="tab active" type="button" role="tab" aria-selected="true" data-tab="layout">Ленты</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="matrix">Матрица</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="json">JSON</button>
+      </div>
+
+      <section class="tab-panel active layout-panel" data-panel="layout">
+        <div class="strip-create-card">
+          <div class="section-title"><span>Новая лента</span><small>добавится после последнего LED</small></div>
+          <label class="create-name"><span>Название</span><input id="newStripName" type="text" placeholder="Например, Под столом"></label>
+          <div class="strip-create-row">
+            <label><span>Количество LED</span><input id="newStripCount" type="number" min="1" max="2000" step="1" value="60"></label>
+            <fieldset class="orientation-picker">
+              <legend>Ориентация</legend>
+              <label><input type="radio" name="newStripOrientation" value="horizontal" checked><span>↔</span></label>
+              <label><input type="radio" name="newStripOrientation" value="vertical"><span>↕</span></label>
+            </fieldset>
+          </div>
+          <button class="button primary wide" id="createStrip" type="button">＋ Создать ленту</button>
+        </div>
+
+        <div class="layout-strip-heading"><span>Ленты на холсте</span><b id="layoutStripCount">0</b></div>
+        <div class="layout-strip-list" id="layoutStripList"></div>
+
+        <div class="snap-card">
+          <label class="switch-row">
+            <span><b>Магнитизм</b><small>Края, центр и соседние ленты</small></span>
+            <input id="snapEnabled" type="checkbox" checked><i aria-hidden="true"></i>
+          </label>
+          <label class="range-control">
+            <span><b>Сила доводки</b><output id="snapStrengthOutput">1.5%</output></span>
+            <input id="snapStrength" type="range" min="0.2" max="5" step="0.1" value="1.5">
+          </label>
+        </div>
+
+        <p class="callout">Выберите ленту в списке или прямо на экране. Тяните за рамку, чтобы двигать; за углы — чтобы менять размер.</p>
+      </section>
+
+      <section class="tab-panel" data-panel="matrix">
+        <div class="matrix-fields">
+          <label><span>Столбцы</span><input type="number" min="1" max="256" step="1" data-matrix="columns"></label>
+          <label><span>Строки</span><input type="number" min="1" max="256" step="1" data-matrix="rows"></label>
+        </div>
+        <fieldset class="segmented-field">
+          <legend>Проводка</legend>
+          <label><input type="radio" name="wiring" value="snake" checked><span>Змейка</span></label>
+          <label><input type="radio" name="wiring" value="parallel"><span>Параллельно</span></label>
+        </fieldset>
+        <fieldset class="start-corner">
+          <legend>Первый LED</legend>
+          <label><input type="radio" name="matrixStart" value="top-left" checked><span>↖</span></label>
+          <label><input type="radio" name="matrixStart" value="top-right"><span>↗</span></label>
+          <label><input type="radio" name="matrixStart" value="bottom-left"><span>↙</span></label>
+          <label><input type="radio" name="matrixStart" value="bottom-right"><span>↘</span></label>
+        </fieldset>
+        <p class="callout">Матрица заполняет весь кадр. Порядок нумерации учитывает стартовый угол и способ проводки.</p>
+      </section>
+
+      <section class="tab-panel json-panel" data-panel="json">
+        <label for="jsonEditor">Конфигурация HyperHDR</label>
+        <textarea id="jsonEditor" spellcheck="false" aria-describedby="jsonHint"></textarea>
+        <div class="json-actions">
+          <button class="button primary" id="applyJson" type="button">Применить JSON</button>
+          <button class="button ghost" id="formatJson" type="button">Форматировать</button>
+        </div>
+        <p class="help" id="jsonHint">Можно вставить массив LED из HyperHDR. Неизвестные свойства сохраняются.</p>
+      </section>
+    </aside>
+
+    <section class="stage-column" aria-label="Визуальный редактор">
+      <div class="stage-toolbar">
+        <div class="history-actions">
+          <button class="icon-button" id="undoButton" type="button" title="Отменить (Ctrl/Cmd+Z)" aria-label="Отменить">↶</button>
+          <button class="icon-button" id="redoButton" type="button" title="Повторить (Ctrl/Cmd+Shift+Z)" aria-label="Повторить">↷</button>
+        </div>
+        <div class="view-actions">
+          <label class="compact-check"><input id="showNumbers" type="checkbox"><span>Номера</span></label>
+          <label class="compact-check"><input id="showZones" type="checkbox" checked><span>Зоны</span></label>
+          <button class="button ghost compact" id="fitButton" type="button">Вписать</button>
+        </div>
+      </div>
+
+      <div class="stage" id="stage">
+        <div class="screen-wrap" id="screenWrap">
+          <div class="screen" id="screen">
+            <div class="screen-glow" aria-hidden="true"></div>
+            <div class="screen-copy" aria-hidden="true">
+              <span>FRAME 16:9</span>
+              <strong>Перетаскивайте ленты целиком</strong>
+              <small>рамка двигает · углы меняют размер · магнитизм доводит</small>
+            </div>
+            <div class="led-layer" id="ledLayer"></div>
+            <div class="strip-layer" id="stripLayer"></div>
+            <div class="snap-guide snap-guide-x" id="snapGuideX" aria-hidden="true"></div>
+            <div class="snap-guide snap-guide-y" id="snapGuideY" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="start-legend"><span></span> LED 0 <i></i> LED 1 <em></em> LED 2</div>
+      </div>
+
+      <div class="validation-bar" id="validationBar">
+        <span class="validation-icon">✓</span>
+        <span id="validationText">Конфигурация корректна</span>
+      </div>
+    </section>
+
+    <aside class="panel inspector-panel" aria-label="Параметры выбранной ленты">
+      <div class="panel-heading">
+        <div>
+          <span class="eyebrow">Настройка ленты</span>
+          <h2 id="inspectorTitle">Лента</h2>
+        </div>
+        <span class="index-badge" id="indexBadge">—</span>
+      </div>
+
+      <div class="inspector-view strip-editor active" data-inspector-view="strips">
+        <p class="batch-intro">Лента редактируется как единый объект. Можно двигать и растягивать её на холсте, а отдельные LED сохраняют относительное положение.</p>
+        <div class="strip-list" id="stripList" aria-label="Найденные ленты"></div>
+
+        <label class="field-row"><span>Название</span><input id="stripName" type="text" placeholder="Лента"></label>
+
+        <div class="range-index-fields strip-range-fields">
+          <label><span>Начало диапазона</span><input id="stripFrom" type="number" min="0" step="1" value="0"></label>
+          <span>…</span>
+          <label><span>Конец диапазона</span><input id="stripTo" type="number" min="0" step="1" value="80"></label>
+        </div>
+        <div class="batch-selection-summary"><b id="stripCount">81 LED</b><span id="stripSide">правая сторона</span></div>
+
+        <div class="strip-direction-preview">
+          <span id="stripDirectionLabel">Сейчас сверху → вниз</span>
+          <strong id="stripDirectionLine">[0] … [80]</strong>
+        </div>
+
+        <div class="strip-actions">
+          <button class="button primary" id="pinStripEdges" type="button">⇥ Поджать края</button>
+          <button class="button primary" id="mirrorStripVertical" type="button">↕ Отразить по вертикали</button>
+          <button class="button ghost" id="mirrorStripHorizontal" type="button">↔ Отразить по горизонтали</button>
+          <button class="button ghost" id="reverseStripGeometry" type="button">⇅ Развернуть порядок зон</button>
+          <button class="button danger" id="deleteStrip" type="button">Удалить выбранную ленту</button>
+        </div>
+        <p class="help strip-help"><b>Поджать края:</b> LED до указанного диапазона повторят его первый крайний LED, а LED после диапазона — последний. Поджатие действует только внутри выбранной ленты.</p>
+      </div>
+
+      <div class="stats-card">
+        <span>Группы<b id="groupCount">0</b></span>
+        <span>Отключены<b id="disabledCount">0</b></span>
+        <span>Ток @ 5V<b id="currentCount">6.6 A</b></span>
+      </div>
+      <p class="autosave-note"><span></span> Изменения сохраняются в этом браузере</p>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
